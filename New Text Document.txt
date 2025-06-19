@@ -1,0 +1,120 @@
+import datetime
+
+class Account:
+    """
+    Represents a simple bank account with deposit, withdrawal,
+    and transaction history capabilities.
+    """
+
+    @staticmethod
+    def current_time():
+        """
+        Returns the current timestamp.
+        This is a static method as it doesn't depend on a specific account instance.
+        """
+        return datetime.datetime.now()
+
+    def __init__(self, name, initial_balance=0):
+        """
+        Initializes a new account.
+
+        Args:
+            name (str): The name of the account holder.
+            initial_balance (int/float): The starting balance for the account.
+                                          Defaults to 0.
+        """
+        self.name = name
+        # Ensure balance is non-negative
+        self.balance = max(0, initial_balance)
+        print(f"Account for {self.name} created with initial balance: ${self.balance:.2f}")
+        # Store transactions as (timestamp, amount, type, resulting_balance) tuples
+        self.transactions = []
+        if initial_balance > 0:
+            self.transactions.append((Account.current_time(), initial_balance, "INITIAL DEPOSIT", self.balance))
+
+    def deposit(self, amount):
+        """
+        Deposits a specified amount into the account.
+
+        Args:
+            amount (int/float): The amount to deposit. Must be positive.
+        """
+        if amount > 0:
+            self.balance += amount
+            self.transactions.append((Account.current_time(), amount, "DEPOSIT", self.balance))
+            self.show_balance()
+        else:
+            print("Deposit amount must be positive.")
+
+    def withdraw(self, amount):
+        """
+        Withdraws a specified amount from the account.
+
+        Args:
+            amount (int/float): The amount to withdraw. Must be positive.
+        """
+        if amount <= 0:
+            print("Withdrawal amount must be positive.")
+        elif self.balance >= amount:
+            self.balance -= amount
+            self.transactions.append((Account.current_time(), amount, "WITHDRAWAL", self.balance))
+            self.show_balance()
+        else:
+            # Added a more descriptive message
+            print(f"Insufficient funds. Cannot withdraw ${amount:.2f}. Current balance: ${self.balance:.2f}")
+
+    def show_balance(self):
+        """
+        Displays the current balance of the account.
+        """
+        print(f"{self.name}'s current balance is: ${self.balance:.2f}")
+
+    def get_transaction_history(self):
+        """
+        Displays and returns the list of all transactions for the account.
+        Each entry shows timestamp, type, amount, and balance after the transaction.
+        """
+        if not self.transactions:
+            print(f"{self.name} has no transaction history yet.")
+            return []
+        print(f"\n--- {self.name}'s Transaction History ---")
+        print(f"{'Date Time':<20} | {'Type':<15} | {'Amount':<10} | {'Balance':<10}")
+        print("-" * 60)
+        for timestamp, amount, trans_type, resulting_balance in self.transactions:
+            sign = '+' if trans_type in ["DEPOSIT", "INITIAL DEPOSIT"] else '-'
+            print(f"{timestamp.strftime('%Y-%m-%d %H:%M:%S'):<20} | {trans_type:<15} | {sign}${amount:<9.2f} | ${resulting_balance:<9.2f}")
+        print("------------------------------------------------------------")
+        return self.transactions
+
+    def __str__(self):
+        """
+        Provides a user-friendly string representation of the Account object.
+        """
+        return f"Account Holder: {self.name}, Current Balance: ${self.balance:.2f}"
+
+    def __repr__(self):
+        """
+        Provides a developer-friendly string representation for debugging.
+        """
+        return f"Account(name='{self.name}', balance={self.balance:.2f})"
+
+# --- Example Usage ---
+print("--- Creating Muneeb's Account ---")
+muneeb = Account('Muneeb', 100)
+muneeb.deposit(500)
+muneeb.withdraw(150)
+muneeb.withdraw(1000) # Should show insufficient funds
+muneeb.show_balance()
+muneeb.get_transaction_history()
+
+
+print("\n--- Creating Ahmad's Account ---")
+ahmad = Account('Ahmad', 1100)
+ahmad.deposit(5000)
+ahmad.withdraw(500)
+ahmad.show_balance()
+ahmad.get_transaction_history()
+
+# You can also print the object directly using its __str__ method
+print(f"\n{muneeb}")
+print(f"{ahmad}")
